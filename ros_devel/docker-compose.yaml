@@ -1,0 +1,14 @@
+version: "3.9"
+services:
+  ros_dev:
+    container_name: ros_dev
+    build: .
+    image: macmacal/ros_dev:latest
+    network_mode: host
+    volumes:
+      - ~/dev/ros2_workspace:/ws
+      - ~/dev/ros2_workspace/containers/ros_devel/zsh_history_docker:/root/.zsh_history
+    command: zsh
+    env_file: env
+    tty: true
+    stdin_open: true
