@@ -1,0 +1,19 @@
+version: "3.9"
+services:
+  rl_dev:
+    container_name: rl_develop
+    build: .
+    image: macmacal/rl_devel:latest
+    network_mode: host
+    volumes:
+      - ~/ws_phd:/mnt/ws
+      - ~/ws_phd/zsh_history_docker:/user/.zsh_history
+    command: zsh
+    env_file: env
+    tty: true
+    stdin_open: true
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]

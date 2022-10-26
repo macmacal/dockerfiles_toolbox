@@ -1,0 +1,109 @@
+FROM nvidia/cuda:11.6.2-cudnn8-devel-ubuntu20.04 as base
+LABEL maintainer="macal@agh.edu.pl"
+
+ENV PYTHON_VERSION=3.10
+ENV MINICONDA_URL https://repo.continuum.io/miniconda/Miniconda3-4.7.12.1-Linux-x86_64.sh
+ENV PYTORCH_URL https://download.pytorch.org/whl/cu116
+
+# LOCALE & INSTALLATION UTILITY
+# -------------------------------------------------------------------------------------------- #
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8
+
+RUN echo 'Etc/UTC' > /etc/timezone \
+    && ln -s /usr/share/zoneinfo/Etc/UTC /etc/localtime \
+    && apt update > /dev/null \
+    && apt upgrade -y \
+    && apt install -q -y --no-install-recommends \
+        bash \
+        ca-certificates \
+        curl \
+        locales \
+        sudo \
+        tzdata \
+        zsh \
+    && rm -rf /var/lib/apt/lists/* \
+    && locale-gen ${LC_ALL} > /dev/null \
+    && dpkg-reconfigure locales > /dev/null
+
+# Create an user
+# -------------------------------------------------------------------------------------------- #
+RUN mkdir /mnt/ws \
+    && addgroup user \
+    && adduser --disabled-password --gecos '' --ingroup user --shell /bin/bash user \
+    && ln -s /mnt/ws /home/user/ws \
+    && chown -R user:user /mnt/ws /home/user \
+    && echo "user ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/90-user
+
+RUN wget https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh -O - | zsh || true \
+    && usermod --shell /bin/zsh root \
+    && usermod --shell /bin/zsh user
+
+ENV HOME /home/user
+USER user
+
+# Miniconda environment
+# -------------------------------------------------------------------------------------------- #
+ENV CONDA_AUTO_UPDATE_CONDA false
+ENV PATH /home/user/miniconda/bin:$PATH
+
+RUN curl -sL ${MINICONDA_URL} > ~/miniconda.sh \
+    && chmod +x ~/miniconda.sh \
+    && ~/miniconda.sh -b -p ~/miniconda \
+    && rm ~/miniconda.sh \
+    && conda install -y python==${PYTHON_VERSION} \
+    && conda clean -ya
+
+# PyTorch + torchvision
+# -------------------------------------------------------------------------------------------- #
+RUN pip3 install torch torchvision --extra-index-url ${PYTORCH_URL} \
+    && rm -rf /home/user/.cache/pip
+
+# Jupyterlab
+# -------------------------------------------------------------------------------------------- #
+RUN conda install \
+        jupyterlab \
+    && mkdir -p /home/user/.jupyter \
+    && (echo "c.NotebookApp.ip = '*'"; echo "c.NotebookApp.notebook_dir = '/mnt/ws'")  >> /home/user/.jupyter/jupyter_notebook_config.py \
+    && conda clean -ya
+
+# TOOLS
+# -------------------------------------------------------------------------------------------- #
+USER root
+RUN apt update > /dev/null && apt install -y \
+        bash-completion \
+        dnsutils \
+        git \
+        htop \
+        iproute2 \
+        iputils-ping \
+        mc \
+        neovim \
+        net-tools \
+        ranger \
+        tmux \
+        wget \
+    && rm -rf /var/lib/apt/lists/*
+
+# Python packages
+# -------------------------------------------------------------------------------------------- #
+USER user
+RUN python3 -m pip install \
+        dm_control \
+        gym \
+        procgen \
+    && conda install \
+        matplotlib \
+        pandas \
+        pyyaml \
+        tensorboard \ 
+    && conda clean -ya \
+    && rm -rf /home/user/.cache/pip
+
+# ENTRYPOINT
+# -------------------------------------------------------------------------------------------- #
+COPY entrypoint.sh /home/user/.
+ENTRYPOINT ["/home/user/entrypoint.sh"]
+WORKDIR /mnt/ws
+CMD ["zsh"]
