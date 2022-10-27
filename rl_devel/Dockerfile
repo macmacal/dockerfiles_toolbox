@@ -57,7 +57,7 @@ RUN curl -sL ${MINICONDA_URL} > ~/miniconda.sh \
 
 # PyTorch + torchvision
 # -------------------------------------------------------------------------------------------- #
-RUN pip3 install torch torchvision --extra-index-url ${PYTORCH_URL} \
+RUN pip3 install torch torchvision torchrl --extra-index-url ${PYTORCH_URL} \
     && rm -rf /home/user/.cache/pip
 
 # Jupyterlab
@@ -92,6 +92,9 @@ USER user
 RUN python3 -m pip install \
         dm_control \
         gym \
+        gymnasium-robotics \
+        gymnasium \
+        mujoco-py \
         procgen \
     && conda install \
         matplotlib \
