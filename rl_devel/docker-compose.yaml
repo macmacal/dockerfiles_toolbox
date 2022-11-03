@@ -7,7 +7,8 @@ services:
     network_mode: host
     volumes:
       - ~/ws_phd:/mnt/ws
-      - ~/ws_phd/zsh_history_docker:/user/.zsh_history
+      - ~/ws_phd/zshrc_docker:/home/user/.zshrc
+      - ~/ws_phd/zsh_history_docker:/home/user/.zsh_history
     command: zsh
     env_file: env
     tty: true

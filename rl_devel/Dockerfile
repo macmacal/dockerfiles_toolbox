@@ -89,19 +89,47 @@ RUN apt update > /dev/null && apt install -y \
 # Python packages
 # -------------------------------------------------------------------------------------------- #
 USER user
+RUN conda install \
+        matplotlib \
+        pandas \
+        pyyaml \
+        tensorboard \ 
+    && conda clean -ya
+
+
+# -------------------------------------------------------------------------------------------- #
+FROM base as env_frameworks
+
+ENV MUJOCO_BIN_URL=https://mujoco.org/download/mujoco210-linux-x86_64.tar.gz
+
+# ENV frameworks
+# -------------------------------------------------------------------------------------------- #
+USER root
+RUN apt update > /dev/null && apt install -y \
+        libosmesa6-dev \
+        patchelf \
+    && rm -rf /var/lib/apt/lists/*
+
+USER user
 RUN python3 -m pip install \
         dm_control \
         gym \
         gymnasium-robotics \
         gymnasium \
-        mujoco-py \
+        mujoco \
         procgen \
-    && conda install \
-        matplotlib \
-        pandas \
-        pyyaml \
-        tensorboard \ 
-    && conda clean -ya \
+    && rm -rf /home/user/.cache/pip \
+    && mkdir -p ~/.mujoco \
+    && curl -sL ${MUJOCO_BIN_URL} > /home/user/.mujoco/mujoco210.tar.gz \
+    && tar -xf /home/user/.mujoco/mujoco210.tar.gz -C /home/user/.mujoco \
+    && rm /home/user/.mujoco/mujoco210.tar.gz \
+    && echo "LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/home/user/.mujoco/mujoco210/bin" >> ~/.bashrc
+
+
+# -------------------------------------------------------------------------------------------- #
+FROM env_frameworks as ray_rrlib
+
+RUN python3 -m pip install -U "ray[rllib]" \
     && rm -rf /home/user/.cache/pip
 
 # ENTRYPOINT
