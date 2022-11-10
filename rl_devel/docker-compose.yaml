@@ -9,6 +9,8 @@ services:
       - ~/ws_phd:/mnt/ws
       - ~/ws_phd/zshrc_docker:/home/user/.zshrc
       - ~/ws_phd/zsh_history_docker:/home/user/.zsh_history
+      - ~/ws_phd/ray_results:/home/user/ray_results
+      - /tmp/.X11-unix:/tmp/.X11-unix
     command: zsh
     env_file: env
     tty: true
