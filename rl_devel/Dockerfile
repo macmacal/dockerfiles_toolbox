@@ -106,18 +106,28 @@ ENV MUJOCO_BIN_URL=https://mujoco.org/download/mujoco210-linux-x86_64.tar.gz
 # -------------------------------------------------------------------------------------------- #
 USER root
 RUN apt update > /dev/null && apt install -y \
+        libgl1-mesa-glx \
+        libglew2.1 \ 
+        libglfw3 \ 
         libosmesa6-dev \
         patchelf \
     && rm -rf /var/lib/apt/lists/*
 
 USER user
 RUN python3 -m pip install \
+        PyOpenGL \
+        #TODO Quick workaround for PyOpenGL-accelerate https://github.com/mcfletch/pyopengl/issues/78
+        git+https://github.com/mcfletch/pyopengl.git@227f9c66976d9f5dadf62b9a97e6beaec84831ca#subdirectory=accelerate \
+    && python3 -m pip install \
         dm_control \
+        gputil \
         gym \
-        gymnasium-robotics \
         gymnasium \
+        gymnasium-robotics \
         mujoco \
         procgen \
+        pygame \
+        pyrender \
     && rm -rf /home/user/.cache/pip \
     && mkdir -p ~/.mujoco \
     && curl -sL ${MUJOCO_BIN_URL} > /home/user/.mujoco/mujoco210.tar.gz \
