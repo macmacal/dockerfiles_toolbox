@@ -139,7 +139,7 @@ RUN python3 -m pip install \
 # -------------------------------------------------------------------------------------------- #
 FROM env_frameworks as ray_rrlib
 
-RUN python3 -m pip install -U "ray[rllib]" \
+RUN python3 -m pip install -U "ray[rllib]" "ray[serve]" \
     && rm -rf /home/user/.cache/pip
 
 # ENTRYPOINT
