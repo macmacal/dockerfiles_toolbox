@@ -2,6 +2,9 @@ FROM nvidia/cuda:11.6.2-cudnn8-devel-ubuntu20.04 as base
 LABEL maintainer="macal@agh.edu.pl"
 
 ENV PYTHON_VERSION=3.10
+ENV RAY_VERSION=2.1.0
+ENV TORCH_VERSION=1.13.1+cu116
+ENV TORCHVISION_VERSION=0.14.1+cu116
 ENV MINICONDA_URL https://repo.continuum.io/miniconda/Miniconda3-4.7.12.1-Linux-x86_64.sh
 ENV PYTORCH_URL https://download.pytorch.org/whl/cu116
 
@@ -57,7 +60,7 @@ RUN curl -sL ${MINICONDA_URL} > ~/miniconda.sh \
 
 # PyTorch + torchvision
 # -------------------------------------------------------------------------------------------- #
-RUN pip3 install torch torchvision torchrl --extra-index-url ${PYTORCH_URL} \
+RUN pip3 install torch==$TORCH_VERSION torchvision==$TORCHVISION_VERSION --extra-index-url ${PYTORCH_URL} \
     && rm -rf /home/user/.cache/pip
 
 # Jupyterlab
@@ -147,7 +150,7 @@ FROM env_frameworks as ray_rrlib
 
 # TODO Removing a problematic folder is a quick fix...
 RUN rm -rf /home/user/miniconda/lib/python3.10/site-packages/numpy-1.24.3.dist-info \
-    && python3 -m pip install -U "ray[rllib]==2.1.0" "ray[serve]==2.1.0" \
+    && python3 -m pip install -U "ray[rllib]==$RAY_VERSION" "ray[serve]==$RAY_VERSION" \
     && rm -rf /home/user/.cache/pip
 
 # ENTRYPOINT
