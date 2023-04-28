@@ -148,9 +148,12 @@ RUN python3 -m pip install \
 # -------------------------------------------------------------------------------------------- #
 FROM env_frameworks as ray_rrlib
 
-# TODO Removing a problematic folder is a quick fix...
+# Info about fixes: 
+# This numpy version leaves a problematic folder...
+# grpcio in version 1.48.0 crahses the main Ray node
 RUN rm -rf /home/user/miniconda/lib/python3.10/site-packages/numpy-1.24.3.dist-info \
     && python3 -m pip install -U "ray[rllib]==$RAY_VERSION" "ray[serve]==$RAY_VERSION" \
+    && python3 -m pip install grpcio==1.42.0 \
     && rm -rf /home/user/.cache/pip
 
 # ENTRYPOINT
@@ -159,5 +162,3 @@ COPY entrypoint.sh /home/user/.
 ENTRYPOINT ["/home/user/entrypoint.sh"]
 WORKDIR /mnt/ws
 CMD ["zsh"]
-
-# TODO - consider freezing all versions
