@@ -147,7 +147,7 @@ FROM env_frameworks as ray_rrlib
 
 # TODO Removing a problematic folder is a quick fix...
 RUN rm -rf /home/user/miniconda/lib/python3.10/site-packages/numpy-1.24.3.dist-info \
-    && python3 -m pip install -U "ray[rllib]" "ray[serve]" \
+    && python3 -m pip install -U "ray[rllib]==2.1.0" "ray[serve]==2.1.0" \
     && rm -rf /home/user/.cache/pip
 
 # ENTRYPOINT
