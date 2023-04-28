@@ -5,11 +5,12 @@ services:
     build: .
     image: macmacal/rl_devel:latest
     network_mode: host
+    shm_size: 11gb
     volumes:
-      - ~/ws_phd:/mnt/ws
-      - ~/ws_phd/zshrc_docker:/home/user/.zshrc
-      - ~/ws_phd/zsh_history_docker:/home/user/.zsh_history
-      - ~/ws_phd/ray_results:/home/user/ray_results
+      - /mnt/storage/PAPER_1/from_battlestation/ws_phd:/mnt/ws
+      - /mnt/storage/PAPER_1/from_battlestation/ws_phd/zshrc_docker:/home/user/.zshrc
+      - /mnt/storage/PAPER_1/from_battlestation/ws_phd/zsh_history_docker:/home/user/.zsh_history
+      - /mnt/storage/PAPER_1/from_battlestation/ws_phd/ray_results_eval:/home/user/ray_results
       - /tmp/.X11-unix:/tmp/.X11-unix
     command: zsh
     env_file: env

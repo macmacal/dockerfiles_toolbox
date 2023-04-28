@@ -66,7 +66,12 @@ RUN conda install \
         jupyterlab \
     && mkdir -p /home/user/.jupyter \
     && (echo "c.NotebookApp.ip = '*'"; echo "c.NotebookApp.notebook_dir = '/mnt/ws'")  >> /home/user/.jupyter/jupyter_notebook_config.py \
-    && conda clean -ya
+    && conda clean -ya \
+    && python3 -m pip install \
+        black \
+        black[jupyter] \
+        isort \
+        jupyterlab-code-formatter
 
 # TOOLS
 # -------------------------------------------------------------------------------------------- #
@@ -111,6 +116,7 @@ RUN apt update > /dev/null && apt install -y \
         libglfw3 \ 
         libosmesa6-dev \
         patchelf \
+        xvfb \
     && rm -rf /var/lib/apt/lists/*
 
 USER user
@@ -139,7 +145,9 @@ RUN python3 -m pip install \
 # -------------------------------------------------------------------------------------------- #
 FROM env_frameworks as ray_rrlib
 
-RUN python3 -m pip install -U "ray[rllib]" "ray[serve]" \
+# TODO Removing a problematic folder is a quick fix...
+RUN rm -rf /home/user/miniconda/lib/python3.10/site-packages/numpy-1.24.3.dist-info \
+    && python3 -m pip install -U "ray[rllib]" "ray[serve]" \
     && rm -rf /home/user/.cache/pip
 
 # ENTRYPOINT
@@ -148,3 +156,5 @@ COPY entrypoint.sh /home/user/.
 ENTRYPOINT ["/home/user/entrypoint.sh"]
 WORKDIR /mnt/ws
 CMD ["zsh"]
+
+# TODO - consider freezing all versions
