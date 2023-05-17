@@ -74,7 +74,8 @@ RUN conda install \
         black \
         black[jupyter] \
         isort \
-        jupyterlab-code-formatter
+        jupyterlab-code-formatter \
+        jupyterlab_nvdashboard
 
 # TOOLS
 # -------------------------------------------------------------------------------------------- #
